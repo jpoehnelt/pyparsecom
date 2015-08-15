@@ -43,9 +43,9 @@ class ParseObjectTest(unittest.TestCase):
         ny.save()
 
         ny.fetch()
-        self.assertIsNotNone(ny.objectId)
-        self.assertIsNotNone(ny.createdAt)
-        self.assertIsNotNone(ny.updatedAt)
+        self.assertNotEqual(ny.objectId, None)
+        self.assertNotEqual(ny.createdAt, None)
+        self.assertNotEqual(ny.updatedAt, None)
 
     def test_get(self):
         City = ParseObject.extend('City')
