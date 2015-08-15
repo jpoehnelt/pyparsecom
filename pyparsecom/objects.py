@@ -1,5 +1,5 @@
 from .core import Parse
-
+from six import add_metaclass
 
 class ComplexTypeMeta(type):
     register = {}
@@ -11,8 +11,8 @@ class ComplexTypeMeta(type):
         return mcs.register[name]
 
 
+@add_metaclass(ComplexTypeMeta)
 class ParseType(object):
-    __metaclass__ = ComplexTypeMeta
     meta_fields = ['_data', '_is_dirty', '_is_loaded', 'objectId', 'createdAt', 'updatedAt', '__type']
 
     @staticmethod
@@ -99,24 +99,6 @@ class ParseObject(ParseType):
     def _load_from_parse(self, response):
         for k,v in response.items():
             setattr(self, k, ParseType.convert_from_parse_to_native(k, v))
-
-
-    @classmethod
-    def extend(cls, class_name):
-        if class_name == 'User':
-            raise NotImplemented
-
-        # cannot extend two degrees away from ParseObject
-        if cls != ParseObject:
-            raise Exception
-
-        if class_name in Parse.class_map:
-            return Parse.class_map[class_name]
-
-        new_class = type(class_name, (ParseObject,), {})
-        Parse.class_map[class_name] = new_class
-
-        return new_class
 
     @classmethod
     def get(cls, objectId):
