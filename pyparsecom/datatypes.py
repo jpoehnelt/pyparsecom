@@ -1,4 +1,4 @@
-from pyparsecom.core import Parse
+from .core import Parse
 
 
 class ParseObject(object):
