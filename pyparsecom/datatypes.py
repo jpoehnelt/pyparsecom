@@ -1,4 +1,4 @@
-from core import Parse
+from pyparsecom.core import Parse
 
 
 class ParseObject(object):
@@ -40,4 +40,3 @@ class ParseObject(object):
         ParseObject.class_map[class_name] = new_class
 
         return new_class
-

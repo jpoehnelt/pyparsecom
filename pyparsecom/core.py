@@ -1,5 +1,5 @@
 from requests import request
-from exceptions import ParseException
+from pyparsecom.exceptions import ParseException
 
 
 class Parse:
