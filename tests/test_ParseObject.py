@@ -20,8 +20,8 @@ class ParseObjectTest(unittest.TestCase):
         class MoreCustom(Custom):
             pass
 
-        self.assertIn('Custom', ComplexTypeMeta.register)
-        self.assertIn('MoreCustom', ComplexTypeMeta.register)
+        self.assertTrue('Custom' in ComplexTypeMeta.register)
+        self.assertTrue('MoreCustom' in ComplexTypeMeta.register)
 
     def test_object_attributes(self):
         class Custom(ParseObject):
@@ -65,23 +65,6 @@ class ParseObjectTest(unittest.TestCase):
 
         ny2 = City.get(ny.objectId)
         self.assertEqual(ny.objectId, ny2.objectId)
-
-    def test_with_complex_type_as_attribute(self):
-        class City(ParseObject):
-            pass
-
-        ny = City(name='New York')
-        ny.location = {
-            "__type": "GeoPoint",
-            "latitude": 40.0,
-            "longitude": -30.0
-        }
-
-        ny.save()
-
-        ny.fetch()
-
-        print ny.__dict__
 
     def test_complex_type_as_attribute_has_correct_class(self):
         class City(ParseObject):
