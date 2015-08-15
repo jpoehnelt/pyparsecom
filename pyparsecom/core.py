@@ -74,12 +74,3 @@ class Parse:
 
     def batch(self):
         raise NotImplemented
-
-
-if __name__ == "__main__":
-    p = Parse.initialize('w32obnqOXh5n61OTuXIAbRZRj73oyEWCDuMBOQQu',
-              'ZjCmqLRivFF16Ei8PV044XU0VgoqNL34wuvI4NQ7')
-    o = Parse.initialize('w32obnqOXh5n61OTuXIAbRZRj73oyEWCDuMBOQQu',
-              'ZjCmqLRivFF16Ei8PV044XU0VgoqNL34wuvI4NQ7')
-
-    print o, p
