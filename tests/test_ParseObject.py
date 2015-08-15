@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pyparsecom.core import Parse
-from pyparsecom.datatypes import ParseObject
+from pyparsecom.objects import ParseObject, ComplexTypeMeta
 
 
 class ParseObjectTest(unittest.TestCase):
@@ -13,13 +13,20 @@ class ParseObjectTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_object_extend(self):
-        Custom = ParseObject.extend('Custom')
-        c = Custom()
-        self.assertEqual(type(c).__name__, 'Custom')
+    def test_object_class_register(self):
+        class Custom(ParseObject):
+            pass
 
-    def test_attributes(self):
-        Custom = ParseObject.extend('Custom')
+        class MoreCustom(Custom):
+            pass
+
+        self.assertIn('Custom', ComplexTypeMeta.register)
+        self.assertIn('MoreCustom', ComplexTypeMeta.register)
+
+    def test_object_attributes(self):
+        class Custom(ParseObject):
+            pass
+
         c = Custom()
         c.a = 1
         self.assertEqual(c.a, 1)
@@ -28,7 +35,8 @@ class ParseObjectTest(unittest.TestCase):
         self.assertEqual(d.name, 'something')
 
     def test_create_object(self):
-        City = ParseObject.extend('City')
+        class City(ParseObject):
+            pass
 
         ny = City(name='New York')
         ny.save()
@@ -37,7 +45,8 @@ class ParseObjectTest(unittest.TestCase):
         self.assertNotEqual(ny.createdAt, None)
 
     def test_fetch(self):
-        City = ParseObject.extend('City')
+        class City(ParseObject):
+            pass
 
         ny = City(name='New York')
         ny.save()
@@ -48,10 +57,45 @@ class ParseObjectTest(unittest.TestCase):
         self.assertNotEqual(ny.updatedAt, None)
 
     def test_get(self):
-        City = ParseObject.extend('City')
+        class City(ParseObject):
+            pass
 
         ny = City(name='New York')
         ny.save()
 
         ny2 = City.get(ny.objectId)
         self.assertEqual(ny.objectId, ny2.objectId)
+
+    def test_with_complex_type_as_attribute(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        ny.location = {
+            "__type": "GeoPoint",
+            "latitude": 40.0,
+            "longitude": -30.0
+        }
+
+        ny.save()
+
+        ny.fetch()
+
+        print ny.__dict__
+
+    def test_complex_type_as_attribute_has_correct_class(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        ny.location = {
+            "__type": "GeoPoint",
+            "latitude": 40.0,
+            "longitude": -30.0
+        }
+
+        ny.save()
+        ny.fetch()
+
+        self.assertEqual(ny.location.__name__, 'GeoPoint')
+

@@ -10,9 +10,8 @@ class Parse:
     """
     server_url = 'https://api.parse.com/1/'
     allowed_routes = ['batch', 'classes', 'events', 'files', 'functions', 'login', 'logout', 'push',
-                      'requestPasswordRest'
-                      'rest_verify_analytics', 'users', 'jobs', 'config', 'sessions',
-                      'upgradeToRevocableSession']
+                      'requestPasswordRest' 'rest_verify_analytics', 'users', 'jobs', 'config',
+                      'sessions', 'upgradeToRevocableSession']
     max_attempts = 5
 
     Initialization = None
