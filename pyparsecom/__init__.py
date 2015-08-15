@@ -5,5 +5,5 @@ __email__ = 'Justin.Poehnelt@gmail.com'
 __version__ = '0.1.0'
 
 
-from core import Parse
-from datatypes import ParseObject
+from pyparsecom.core import Parse
+from pyparsecom.datatypes import ParseObject
