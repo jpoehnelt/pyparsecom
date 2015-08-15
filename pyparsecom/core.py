@@ -1,5 +1,7 @@
 from requests import request
+import json
 from .exceptions import ParseException
+import logging
 
 
 class Parse:
@@ -14,8 +16,9 @@ class Parse:
     max_attempts = 5
 
     Initialization = None
+    Logger = None
 
-    def __init__(self, application_id, rest_api_key, session_token=None, master_key=None):
+    def __init__(self, application_id, rest_api_key, master_key=None):
         self.application_id = application_id
         self.rest_api_key = rest_api_key
         self.master_key = master_key
@@ -28,14 +31,23 @@ class Parse:
             cls.Initialization.application_id = args[0]
             cls.Initialization.rest_api_id = args[1]
             for k, v in kwargs.items():
-                cls.Initialization.set(k, v)
+                setattr(cls, k, v)
+
+        if Parse.Logger is None:
+            Parse.Logger = logging.getLogger()
+
+            Parse.Logger.setLevel(logging.DEBUG)
+
+            log_handler = logging.StreamHandler()
+            log_handler.setLevel(logging.DEBUG)
+            Parse.Logger.addHandler(log_handler)
 
         return cls.Initialization
 
     def request(self, **kwargs):
         route = kwargs.get('route', None)
         class_name = kwargs.get('class_name', None)
-        object_id = kwargs.get('object_id', None)
+        objectId = kwargs.get('objectId', None)
         method = kwargs.get('method', 'get')
         data = kwargs.get('data', None)
 
@@ -47,8 +59,8 @@ class Parse:
         if class_name is not None:
             url += '/' + class_name
 
-        if object_id is not None:
-            url += '/' + object_id
+        if objectId is not None:
+            url += '/' + objectId
 
         headers = {
             'Content-type': 'application/json',
@@ -56,21 +68,26 @@ class Parse:
             'X-Parse-REST-API-Key': self.rest_api_key
         }
 
-        return self._send(url, data, method, headers)
+        return self._send(url, json.dumps(data), method, headers)
 
     def _send(self, url, data, method, headers):
-        attempts = 0
+        attempts = 1
         error = None
-        while ++attempts < Parse.max_attempts:
+        while attempts <= Parse.max_attempts:
             try:
                 response = request(url=url, data=data, method=method, headers=headers)
             except Exception as e:
+                Parse.Logger.exception(e)
                 error = e
+                attempts += 1
             else:
-                return response
+                return response.json()
 
-        # return the error from the last attempt
-        return ParseException()
+        # return the error from the latest attempt
+        raise self.get_exception(error)
 
     def batch(self):
         raise NotImplemented
+
+    def get_exception(self, e):
+        return Exception
