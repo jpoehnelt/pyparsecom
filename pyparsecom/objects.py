@@ -15,16 +15,6 @@ class ParseType(object):
     __metaclass__ = ComplexTypeMeta
     meta_fields = ['_data', '_is_dirty', '_is_loaded', 'objectId', 'createdAt', 'updatedAt', '__type']
 
-    def __setattr__(self, key, value):
-        if key in self.__class__.meta_fields:
-            super(ParseType, self).__setattr__(key, value)
-        else:
-            self._is_dirty = True
-            self._data[key] = value
-
-    def __getattr__(self, item):
-        return self._data[item]
-
     @staticmethod
     def convert_from_parse_to_native(key, data):
         if not isinstance(data, dict):
@@ -45,6 +35,18 @@ class ParseType(object):
         complex_object = type(parse_type, (cls,), data)
 
         return complex_object
+
+    def convert_from_native_to_parse(self):
+        data = {}
+
+        for k, v in self.__dict__.items():
+            if k in ParseType.meta_fields:
+                continue
+
+            data[k] = v
+
+        return data
+
 
 class ParseObject(ParseType):
 
@@ -79,7 +81,7 @@ class ParseObject(ParseType):
             'route': 'classes',
             'class_name': self.__class__.__name__,
             'method': 'POST',
-            'data': self._data
+            'data': self.convert_from_native_to_parse()
         }
 
         if hasattr(self, 'objectId'):
@@ -133,4 +135,3 @@ class ParseObject(ParseType):
 
 class GeoPoint(ParseType):
     __name__ = 'GeoPoint'
-    pass
