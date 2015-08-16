@@ -124,6 +124,55 @@ class ParseObjectTest(unittest.TestCase):
         ny.save()
         self.assertFalse('name' in ny._dirty_keys)
 
+    def test_dirty_keys_with_complex_type(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        geo = GeoPoint(latitude=40.0, longitude=-30)
+        geo2 = GeoPoint(latitude=40.0, longitude=-30)
+
+        ny.location = geo
+        self.assertTrue(ny in geo._parents)
+        self.assertTrue('location' in ny._dirty_keys)
+
+        ny.save()
+        self.assertFalse('location' in ny._dirty_keys)
+
+        # try changing attribute of complex type
+        geo.latitude = 0.00
+        self.assertTrue('location' in ny._dirty_keys)
+
+        ny.save()
+        self.assertFalse('location' in ny._dirty_keys)
+
+        # try deleting attribute of complex type
+        geo.test = 1
+        ny._dirty_keys.clear()
+        del geo.test
+        self.assertTrue('location' in ny._dirty_keys)
+
+        # try replacing reference to complex type
+        ny.location = geo2
+        ny.save()
+        self.assertTrue(ny in geo2._parents)
+        self.assertFalse(ny in geo._parents)
+        geo.latitude = 0.00
+        self.assertFalse('location' in ny._dirty_keys)
+
+        # try deleting reference to complex type
+        del ny.location
+        self.assertFalse(ny in geo2._parents)
+        self.assertFalse(ny in geo2._parents)
+
+        # ParseObject attribute of ParseObject does not carry dirty to parent since it uses pointer
+        sf = City(name='San Francisco')
+        ny.sibling = sf
+        self.assertTrue('sibling' in ny._dirty_keys)
+        ny._dirty_keys.clear()
+        sf.name = 'San Jose'
+        self.assertTrue('name' in sf._dirty_keys)
+        self.assertFalse('sibling' in ny._dirty_keys)
 
     def test_delete_of_object(self):
         class City(ParseObject):

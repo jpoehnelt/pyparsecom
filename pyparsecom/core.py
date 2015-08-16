@@ -1,6 +1,7 @@
 from requests import request
 import json
 from .exceptions import ParseError, ParseResourceException
+import pyparsecom.query
 import logging
 
 
@@ -16,6 +17,7 @@ class Parse:
 
     Initialization = None
     Logger = None
+    Query = pyparsecom.query.Query
 
     def __init__(self, application_id, rest_api_key, master_key=None):
         self.application_id = application_id
@@ -101,6 +103,9 @@ class Parse:
     def batch(self):
         raise NotImplemented
 
+    @classmethod
+    def get_initialization(cls):
+        return cls.Initialization
 
 class SessionToken:
     def __init__(self, session_token):
@@ -122,3 +127,4 @@ class MasterKey:
 
     def __exit__(self, *args, **kwargs):
         del Parse.Initialization.master_key
+

@@ -2,6 +2,7 @@ from .objects import ParseObject
 from .core import SessionToken, Parse
 from six.moves.urllib.parse import urlencode
 
+
 class User(ParseObject):
     __name__ = "_User"
 
@@ -20,7 +21,7 @@ class User(ParseObject):
             response = Parse.Initialization.request(**options)
 
         user = User()
-        user._load_from_parse(response)
+        ParseObject.load_from_parse(response, item=user)
 
         return user
 
@@ -35,7 +36,7 @@ class User(ParseObject):
         response = Parse.Initialization.request(**options)
 
         user = User()
-        user._load_from_parse(response)
+        ParseObject.load_from_parse(response, item=user, is_loaded=True)
 
         return user
 
@@ -50,7 +51,7 @@ class User(ParseObject):
         response = Parse.Initialization.request(**options)
 
         user = User()
-        user._load_from_parse(response)
+        ParseObject.load_from_parse(response, item=user, is_loaded=True)
 
         return user
 
@@ -66,7 +67,7 @@ class User(ParseObject):
 
             response = Parse.Initialization.request(**options)
 
-        self._load_from_parse(response)
+        ParseObject.load_from_parse(response, item=self, is_loaded=True)
         self._dirty_keys.clear()
 
     def delete(self):
