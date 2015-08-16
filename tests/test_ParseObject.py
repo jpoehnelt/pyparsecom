@@ -3,6 +3,7 @@
 import unittest
 from pyparsecom.core import Parse
 from pyparsecom.objects import ParseObject, ComplexTypeMeta
+from pyparsecom.types import GeoPoint
 
 
 class ParseObjectTest(unittest.TestCase):
@@ -71,14 +72,53 @@ class ParseObjectTest(unittest.TestCase):
             pass
 
         ny = City(name='New York')
-        ny.location = {
-            "__type": "GeoPoint",
-            "latitude": 40.0,
-            "longitude": -30.0
-        }
+
+        geo = GeoPoint(latitude=40.0, longitude=-30)
+
+        ny.location = geo
 
         ny.save()
         ny.fetch()
 
         self.assertEqual(ny.location.__name__, 'GeoPoint')
 
+        ny2 = City(objectId=ny.objectId)
+        ny2.fetch()
+
+        self.assertEqual(ny2.location.__name__, 'GeoPoint')
+
+
+    def test_to_pointer_and_back(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        pointer = ny.to_pointer()
+        ny2 = pointer.load()
+        ny2.fetch()
+
+        self.assertEqual(ny.name, ny2.name)
+
+    def test_is_loaded(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        self.assertFalse(ny._is_loaded)
+        ny.save()
+        self.assertFalse(ny._is_loaded)
+        ny.fetch()
+        self.assertTrue(ny._is_loaded)
+
+        pointer = ny.to_pointer()
+        ny2 = pointer.load()
+        self.assertTrue(ny._is_loaded)
+
+    def test_is_dirty(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        self.assertTrue(ny._is_dirty)
+        ny.save()
+        self.assertFalse(ny._is_dirty)

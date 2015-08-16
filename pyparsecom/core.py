@@ -76,17 +76,17 @@ class Parse:
             try:
                 response = request(url=url, data=data, method=method, headers=headers)
             except Exception as e:
-                Parse.Logger.exception(e)
                 error = e
                 attempts += 1
             else:
                 return response.json()
 
         # return the error from the latest attempt
-        raise self.get_exception(error)
+        raise self.get_parse_exception(error)
 
     def batch(self):
         raise NotImplemented
 
-    def get_exception(self, e):
+    def get_parse_exception(self, e):
+        # todo
         return Exception

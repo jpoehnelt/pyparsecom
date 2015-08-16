@@ -1,6 +1,7 @@
 from .core import Parse
 from six import add_metaclass
 
+
 class ComplexTypeMeta(type):
     register = {}
 
@@ -13,54 +14,26 @@ class ComplexTypeMeta(type):
 
 @add_metaclass(ComplexTypeMeta)
 class ParseType(object):
-    meta_fields = ['_data', '_is_dirty', '_is_loaded', 'objectId', 'createdAt', 'updatedAt', '__type']
-
-    @staticmethod
-    def convert_from_parse_to_native(key, data):
-        if not isinstance(data, dict):
-            return data
-
-        parse_type = None
-
-        if '__type' in data:
-            parse_type = str(data.pop('__type'))
-        elif key == 'ACL':
-            parse_type = 'ACL'
-
-        cls = ComplexTypeMeta.register.get(parse_type, None)
-
-        if cls is None:
-            raise Exception
-
-        complex_object = type(parse_type, (cls,), data)
-
-        return complex_object
-
-    def convert_from_native_to_parse(self):
-        data = {}
-
-        for k, v in self.__dict__.items():
-            if k in ParseType.meta_fields:
-                continue
-
-            data[k] = v
-
-        return data
-
-
-class ParseObject(ParseType):
+    PROTECTED_ATTRIBUTES = ['_data', '_is_dirty', '_is_loaded', 'objectId', 'createdAt',
+                            'updatedAt', '__type', 'className']
 
     def __init__(self, **kwargs):
-        self._is_dirty = True
-        self._is_loaded = False
-        self._data = {}
-
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def _convert_from_native_to_parse(self):
+        pass
+
+
+class ParseObject(ParseType):
+    def __init__(self, **kwargs):
+        super(ParseObject, self).__init__(**kwargs)
+        self._is_dirty = True
+        self._is_loaded = False
+
     def fetch(self):
         if not hasattr(self, 'objectId'):
-            raise Exception # cannot fetch without id
+            raise Exception  # cannot fetch without id
 
         options = {
             'route': 'classes',
@@ -81,7 +54,7 @@ class ParseObject(ParseType):
             'route': 'classes',
             'class_name': self.__class__.__name__,
             'method': 'POST',
-            'data': self.convert_from_native_to_parse()
+            'data': self._convert_from_native_to_parse()
         }
 
         if hasattr(self, 'objectId'):
@@ -97,8 +70,8 @@ class ParseObject(ParseType):
         raise NotImplemented
 
     def _load_from_parse(self, response):
-        for k,v in response.items():
-            setattr(self, k, ParseType.convert_from_parse_to_native(k, v))
+        for k, v in response.items():
+            setattr(self, k, self.__class__._convert_from_parse_to_native(k, v))
 
     @classmethod
     def get(cls, objectId):
@@ -114,6 +87,50 @@ class ParseObject(ParseType):
         c._load_from_parse(response)
         return c
 
+    def _convert_from_native_to_parse(self):
+        data = {}
 
-class GeoPoint(ParseType):
-    __name__ = 'GeoPoint'
+        for k, v in self.__dict__.items():
+            if k in ParseType.PROTECTED_ATTRIBUTES:
+                continue
+            if isinstance(v, ParseObject):
+                data[k] = v.to_pointer()._convert_from_native_to_parse()
+            elif isinstance(v, ParseType):
+                data[k] = v._convert_from_native_to_parse()
+            else:
+                data[k] = v
+
+        return data
+
+    @staticmethod
+    def _convert_from_parse_to_native(key, data):
+        if not isinstance(data, dict):
+            return data
+
+        parse_type = None
+
+        if '__type' in data:
+            parse_type = str(data.pop('__type'))
+        elif key == 'ACL':
+            parse_type = 'ACL'
+
+        cls = ComplexTypeMeta.register.get(parse_type, None)
+
+        if cls is None:
+            raise Exception
+
+        complex_object = type(parse_type, (cls,), data)
+
+        return complex_object
+
+    def to_pointer(self):
+        if not hasattr(self, 'objectId'):
+            self.save()
+
+        cls = ComplexTypeMeta.register.get('Pointer', None)
+
+        if cls is None:
+            raise Exception
+
+        return type('Pointer', (cls,), {})(className=self.__class__.__name__,
+                                           objectId=self.objectId)
