@@ -14,7 +14,7 @@ class ComplexTypeMeta(type):
 
 @add_metaclass(ComplexTypeMeta)
 class ParseType(object):
-    PROTECTED_ATTRIBUTES = ['_data', '_is_dirty', '_is_loaded', 'objectId', 'createdAt',
+    PROTECTED_ATTRIBUTES = ['_dirty_keys', '_is_loaded', 'objectId', 'createdAt',
                             'updatedAt', '__type', 'className']
 
     def __init__(self, **kwargs):
@@ -27,9 +27,15 @@ class ParseType(object):
 
 class ParseObject(ParseType):
     def __init__(self, **kwargs):
-        super(ParseObject, self).__init__(**kwargs)
-        self._is_dirty = True
+        self._dirty_keys = set([])
         self._is_loaded = False
+        super(ParseObject, self).__init__(**kwargs)
+
+    def __setattr__(self, key, value):
+        if key not in ParseObject.PROTECTED_ATTRIBUTES:
+            self._dirty_keys.add(key)
+
+        super(ParseObject, self).__setattr__(key, value)
 
     def fetch(self):
         if not hasattr(self, 'objectId'):
@@ -47,14 +53,14 @@ class ParseObject(ParseType):
         self._load_from_parse(response)
 
         self._is_loaded = True
-        self._is_dirty = False
+        self._dirty_keys.clear()
 
     def save(self):
         options = {
             'route': 'classes',
             'class_name': self.__class__.__name__,
             'method': 'POST',
-            'data': self._convert_from_native_to_parse()
+            'data': {k: v for k, v in self._convert_from_native_to_parse().items() if k in self._dirty_keys}
         }
 
         if hasattr(self, 'objectId'):
@@ -63,8 +69,7 @@ class ParseObject(ParseType):
 
         response = Parse.Initialization.request(**options)
         self._load_from_parse(response)
-
-        self._is_dirty = False
+        self._dirty_keys.clear()
 
     def delete(self):
         raise NotImplemented
@@ -91,8 +96,9 @@ class ParseObject(ParseType):
         data = {}
 
         for k, v in self.__dict__.items():
-            if k in ParseType.PROTECTED_ATTRIBUTES:
+            if k in ParseType.PROTECTED_ATTRIBUTES or k not in self._dirty_keys:
                 continue
+
             if isinstance(v, ParseObject):
                 data[k] = v.to_pointer()._convert_from_native_to_parse()
             elif isinstance(v, ParseType):

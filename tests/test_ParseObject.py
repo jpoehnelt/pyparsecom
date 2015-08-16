@@ -114,11 +114,11 @@ class ParseObjectTest(unittest.TestCase):
         ny2 = pointer.load()
         self.assertTrue(ny._is_loaded)
 
-    def test_is_dirty(self):
+    def test_dirty_keys(self):
         class City(ParseObject):
             pass
 
         ny = City(name='New York')
-        self.assertTrue(ny._is_dirty)
+        self.assertTrue('name' in ny._dirty_keys)
         ny.save()
-        self.assertFalse(ny._is_dirty)
+        self.assertFalse('name' in ny._dirty_keys)
