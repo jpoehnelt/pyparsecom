@@ -60,7 +60,7 @@ class ParseObject(ParseType):
             'route': 'classes',
             'class_name': self.__class__.__name__,
             'method': 'POST',
-            'data': {k: v for k, v in self._convert_from_native_to_parse().items() if k in self._dirty_keys}
+            'data': dict((k, v) for k, v in self._convert_from_native_to_parse().items() if k in self._dirty_keys)
         }
 
         if hasattr(self, 'objectId'):
