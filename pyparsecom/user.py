@@ -1,7 +1,6 @@
 from .objects import ParseObject
 from .core import SessionToken, Parse
-import urllib
-
+from six.moves.urllib.parse import urlencode
 
 class User(ParseObject):
     __name__ = "_User"
@@ -30,7 +29,7 @@ class User(ParseObject):
         options = {
             'route': 'login',
             'method': 'GET',
-            'params': urllib.urlencode({'username': username, 'password': password})
+            'params': urlencode({'username': username, 'password': password})
         }
 
         response = Parse.Initialization.request(**options)
@@ -79,10 +78,6 @@ class User(ParseObject):
             }
 
             response = Parse.Initialization.request(**options)
-
-        for k, v in self.__dict__.items():
-            delattr(self, k)
-
 
     @property
     def className(self):

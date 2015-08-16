@@ -36,7 +36,6 @@ class UserTest(unittest.TestCase):
         self.assertEqual(username, user2.username)
         self.assertEqual(len(user2._dirty_keys), 0)
 
-
     def test_delete_of_user(self):
         username = str(uuid.uuid4())
         user = User.signup(username, 'password')
