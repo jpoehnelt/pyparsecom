@@ -45,7 +45,7 @@ class Parse:
 
     def request(self, **kwargs):
         route = kwargs.get('route', None)
-        class_name = kwargs.get('class_name', None)
+        className = kwargs.get('className', None)
         params = kwargs.get('params', None)
         objectId = kwargs.get('objectId', None)
         method = kwargs.get('method', 'get')
@@ -56,8 +56,8 @@ class Parse:
 
         url = Parse.server_url + route
 
-        if class_name is not None:
-            url += '/' + class_name
+        if className is not None:
+            url += '/' + className
 
         if objectId is not None:
             url += '/' + objectId
