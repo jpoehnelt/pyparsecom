@@ -67,6 +67,11 @@ class Parse:
             'X-Parse-REST-API-Key': self.rest_api_key
         }
 
+        if hasattr(self, 'session_token'):
+            headers['X-Parse-Session-Token'] = self.session_token
+        elif hasattr(self, 'master_key'):
+            headers['X-Parse-Master-Key'] = self.master_key
+
         return self._send(url, json.dumps(data), method, headers)
 
     def _send(self, url, data, method, headers):
@@ -90,3 +95,25 @@ class Parse:
     def get_parse_exception(self, e):
         # todo
         return Exception
+
+
+class SessionToken:
+    def __init__(self, session_token):
+        self.session_token = session_token
+
+    def __enter__(self):
+        Parse.Initialization.session_token = self.session_token
+
+    def __exit__(self, *args, **kwargs):
+        del Parse.Initialization.session_token
+
+
+class MasterKey:
+    def __init__(self, master_key):
+        self.master_key = master_key
+
+    def __enter__(self):
+        Parse.Initialization.master = self.master_key
+
+    def __exit__(self, *args, **kwargs):
+        del Parse.Initialization.master_key
