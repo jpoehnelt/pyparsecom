@@ -1,4 +1,5 @@
 from .objects import ParseType, ComplexTypeMeta
+from .exceptions import ParseClassDoesNotExist
 import datetime
 import six
 import base64
@@ -32,7 +33,7 @@ class Pointer(ParseType):
         cls = ComplexTypeMeta.register.get(self.className, None)
 
         if cls is None:
-            raise Exception
+            raise ParseClassDoesNotExist('%s does not exist' % self.className)
 
         return type(self.className, (cls,), {})(**self.__dict__)
 

@@ -1,4 +1,5 @@
 from .core import Parse
+from .exceptions import ParseClassDoesNotExist, ParseResourceException
 from six import add_metaclass
 
 
@@ -29,17 +30,21 @@ class ParseObject(ParseType):
     def __init__(self, **kwargs):
         self._dirty_keys = set([])
         self._is_loaded = False
+
         super(ParseObject, self).__init__(**kwargs)
 
+        if not hasattr(self, 'className'):
+            self.className = self.__class__.__name__
+
     def __setattr__(self, key, value):
-        if key not in ParseObject.PROTECTED_ATTRIBUTES:
+        if key not in self.__class__.PROTECTED_ATTRIBUTES:
             self._dirty_keys.add(key)
 
         super(ParseObject, self).__setattr__(key, value)
 
     def fetch(self):
         if not hasattr(self, 'objectId'):
-            raise Exception  # cannot fetch without id
+            raise ParseResourceException('no objectId')  # cannot fetch without id
 
         options = {
             'route': 'classes',
@@ -123,7 +128,7 @@ class ParseObject(ParseType):
         cls = ComplexTypeMeta.register.get(parse_type, None)
 
         if cls is None:
-            raise Exception
+            raise ParseClassDoesNotExist('%s does not exist', parse_type)
 
         complex_object = type(parse_type, (cls,), data)
 
@@ -136,7 +141,8 @@ class ParseObject(ParseType):
         cls = ComplexTypeMeta.register.get('Pointer', None)
 
         if cls is None:
-            raise Exception
+            raise ParseClassDoesNotExist('Pointer does not exist')
 
-        return type('Pointer', (cls,), {})(className=self.__class__.__name__,
+        return type('Pointer', (cls,), {})(className=self.className,
                                            objectId=self.objectId)
+

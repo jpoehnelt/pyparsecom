@@ -1,6 +1,6 @@
 from requests import request
 import json
-from .exceptions import ParseException
+from .exceptions import ParseError, ParseResourceException
 import logging
 
 
@@ -46,12 +46,13 @@ class Parse:
     def request(self, **kwargs):
         route = kwargs.get('route', None)
         class_name = kwargs.get('class_name', None)
+        params = kwargs.get('params', None)
         objectId = kwargs.get('objectId', None)
         method = kwargs.get('method', 'get')
         data = kwargs.get('data', None)
 
         if route not in Parse.allowed_routes:
-            raise Exception  # todo
+            raise ParseResourceException('%s is not allowed' % route)
 
         url = Parse.server_url + route
 
@@ -60,6 +61,10 @@ class Parse:
 
         if objectId is not None:
             url += '/' + objectId
+
+        if params is not None:
+            url += '?%s' % params
+
 
         headers = {
             'Content-type': 'application/json',
@@ -81,20 +86,20 @@ class Parse:
             try:
                 response = request(url=url, data=data, method=method, headers=headers)
             except Exception as e:
+                Parse.Logger.debug(e)
                 error = e
                 attempts += 1
             else:
+                if response.status_code not in [200, 201]:
+                    raise ParseError(**response.json())
+
                 return response.json()
 
         # return the error from the latest attempt
-        raise self.get_parse_exception(error)
+        raise error
 
     def batch(self):
         raise NotImplemented
-
-    def get_parse_exception(self, e):
-        # todo
-        return Exception
 
 
 class SessionToken:

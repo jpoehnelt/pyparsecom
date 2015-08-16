@@ -4,6 +4,8 @@ import urllib
 
 
 class User(ParseObject):
+    __name__ = "_User"
+
     PROTECTED_ATTRIBUTES = ParseObject.PROTECTED_ATTRIBUTES + ['username', 'sessionToken',
                                                                'emailVerified']
 
