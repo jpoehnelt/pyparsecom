@@ -4,6 +4,7 @@ import unittest
 from pyparsecom.core import Parse
 from pyparsecom.objects import ParseObject, ComplexTypeMeta
 from pyparsecom.types import GeoPoint
+from pyparsecom.exceptions import ParseError
 
 
 class ParseObjectTest(unittest.TestCase):
@@ -122,3 +123,13 @@ class ParseObjectTest(unittest.TestCase):
         self.assertTrue('name' in ny._dirty_keys)
         ny.save()
         self.assertFalse('name' in ny._dirty_keys)
+
+
+    def test_delete_of_object(self):
+        class City(ParseObject):
+            pass
+
+        ny = City(name='New York')
+        ny.save()
+        ny.delete()
+        self.assertRaises(ParseError, ny.fetch)

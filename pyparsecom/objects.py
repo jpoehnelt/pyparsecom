@@ -48,7 +48,7 @@ class ParseObject(ParseType):
 
         options = {
             'route': 'classes',
-            'class_name': self.__class__.__name__,
+            'className': self.__class__.__name__,
             'method': 'GET',
             'objectId': self.objectId
         }
@@ -63,7 +63,7 @@ class ParseObject(ParseType):
     def save(self):
         options = {
             'route': 'classes',
-            'class_name': self.__class__.__name__,
+            'className': self.__class__.__name__,
             'method': 'POST',
             'data': dict((k, v) for k, v in self._convert_from_native_to_parse().items() if k in self._dirty_keys)
         }
@@ -77,7 +77,14 @@ class ParseObject(ParseType):
         self._dirty_keys.clear()
 
     def delete(self):
-        raise NotImplemented
+        options = {
+            'route': 'classes',
+            'className': self.className,
+            'objectId': self.objectId,
+            'method': 'DELETE'
+        }
+
+        Parse.Initialization.request(**options)
 
     def _load_from_parse(self, response):
         for k, v in response.items():
@@ -87,7 +94,7 @@ class ParseObject(ParseType):
     def get(cls, objectId):
         options = {
             'route': 'classes',
-            'class_name': cls.__name__,
+            'className': cls.__name__,
             'method': 'GET',
             'objectId': objectId
         }
