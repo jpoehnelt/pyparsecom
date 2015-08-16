@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pyparsecom.user import User
-from pyparsecom.objects import Parse
+from pyparsecom.core import Parse
 from pyparsecom.exceptions import ParseError
 import uuid
 

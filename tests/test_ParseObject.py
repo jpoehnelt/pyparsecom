@@ -58,16 +58,6 @@ class ParseObjectTest(unittest.TestCase):
         self.assertNotEqual(ny.createdAt, None)
         self.assertNotEqual(ny.updatedAt, None)
 
-    def test_get(self):
-        class City(ParseObject):
-            pass
-
-        ny = City(name='New York')
-        ny.save()
-
-        ny2 = City.get(ny.objectId)
-        self.assertEqual(ny.objectId, ny2.objectId)
-
     def test_complex_type_as_attribute_has_correct_class(self):
         class City(ParseObject):
             pass

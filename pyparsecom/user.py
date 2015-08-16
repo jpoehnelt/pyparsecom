@@ -1,6 +1,27 @@
-from .objects import ParseObject
-from .core import SessionToken, Parse
+# Copyright (c) 2015 Justin Poehnelt
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 from six.moves.urllib.parse import urlencode
+from .core import SessionToken, Parse
+from .objects import ParseObject
 
 
 class User(ParseObject):
@@ -8,7 +29,6 @@ class User(ParseObject):
 
     PROTECTED_ATTRIBUTES = ParseObject.PROTECTED_ATTRIBUTES + ['username', 'sessionToken',
                                                                'emailVerified']
-
     @staticmethod
     def become(session_token):
         with SessionToken(session_token):
@@ -21,7 +41,7 @@ class User(ParseObject):
             response = Parse.Initialization.request(**options)
 
         user = User()
-        ParseObject.load_from_parse(response, item=user)
+        ParseObject.convert_from_parse_to_native(response, item=user)
 
         return user
 
@@ -36,7 +56,7 @@ class User(ParseObject):
         response = Parse.Initialization.request(**options)
 
         user = User()
-        ParseObject.load_from_parse(response, item=user, is_loaded=True)
+        ParseObject.convert_from_parse_to_native(response, item=user, is_loaded=True)
 
         return user
 
@@ -51,7 +71,7 @@ class User(ParseObject):
         response = Parse.Initialization.request(**options)
 
         user = User()
-        ParseObject.load_from_parse(response, item=user, is_loaded=True)
+        ParseObject.convert_from_parse_to_native(response, item=user, is_loaded=True)
 
         return user
 
@@ -67,7 +87,7 @@ class User(ParseObject):
 
             response = Parse.Initialization.request(**options)
 
-        ParseObject.load_from_parse(response, item=self, is_loaded=True)
+        ParseObject.convert_from_parse_to_native(response, item=self, is_loaded=True)
         self._dirty_keys.clear()
 
     def delete(self):

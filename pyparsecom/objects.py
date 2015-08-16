@@ -1,7 +1,27 @@
+# Copyright (c) 2015 Justin Poehnelt
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+from six import add_metaclass
 from .core import Parse
 from .exceptions import ParseClassDoesNotExist, ParseResourceException
-from six import add_metaclass
-from copy import copy
 
 
 class ComplexTypeMeta(type):
@@ -124,14 +144,20 @@ class ParseObject(ParseType):
 
         response = Parse.Initialization.request(**options)
 
-        ParseObject.load_from_parse(response, item=self, is_loaded=True)
+        ParseObject.convert_from_parse_to_native(response, item=self, is_loaded=True)
 
     def save(self):
+        """
+        Saves all dirty attributes of the object to Parse. After, dirty keys are cleared. However
+        Parse does not return the other attributes and therefore the object is not marked as loaded.
+        :return:
+        """
         options = {
             'route': 'classes',
             'className': self.__class__.__name__,
             'method': 'POST',
-            'data': dict((k, v) for k, v in self._convert_from_native_to_parse().items() if k in self._dirty_keys)
+            'data': dict((k, v) for k, v in self._convert_from_native_to_parse().items() if
+                         k in self._dirty_keys)
         }
 
         if hasattr(self, 'objectId'):
@@ -139,10 +165,14 @@ class ParseObject(ParseType):
             options['objectId'] = self.objectId
 
         response = Parse.Initialization.request(**options)
-        ParseObject.load_from_parse(response, item=self, is_loaded=False)
+        ParseObject.convert_from_parse_to_native(response, item=self, is_loaded=False)
         self._dirty_keys.clear()
 
     def delete(self):
+        """
+        Delete the object from Parse. It still exists locally.
+        :return:
+        """
         options = {
             'route': 'classes',
             'className': self.className,
@@ -152,12 +182,8 @@ class ParseObject(ParseType):
 
         Parse.Initialization.request(**options)
 
-    @classmethod
-    def get(cls, objectId):
-        return Parse.Query(cls.__name__).get(objectId)
-
     @staticmethod
-    def load_from_parse(response, className=None, item=None, is_loaded=True):
+    def convert_from_parse_to_native(response, className=None, item=None, is_loaded=True):
 
         if item is None:
             cls = ComplexTypeMeta.register.get(className, None)
@@ -181,9 +207,6 @@ class ParseObject(ParseType):
         data = {}
 
         for k, v in self.__dict__.items():
-            if k in ParseType.PROTECTED_ATTRIBUTES or k not in self._dirty_keys:
-                continue
-
             if isinstance(v, ParseObject):
                 data[k] = v.to_pointer()._convert_from_native_to_parse()
             elif isinstance(v, ParseType):
@@ -194,23 +217,46 @@ class ParseObject(ParseType):
         return data
 
     def _convert_attribute_from_parse_to_native(self, key, data):
+        """
+        Converts attributes to python class by examining the data of the attribute.
+        :param key: attribute name
+        :param data: attribute data
+        :return:
+        """
+
+        # cast to data if possible
+        try:
+            data = pyparsecom.types.Date.from_str(data)
+        except Exception as e:
+            pass
+        else:
+            return data
+
+        # if not a dict it cannot be a complex type
         if not isinstance(data, dict):
             return data
 
-        parse_type = None
-
+        # get the complex type
         if '__type' in data:
             parse_type = str(data.pop('__type'))
         elif key == 'ACL':
             parse_type = 'ACL'
+        else:
+            return data
 
+        # get the python class for the typ
         cls = ComplexTypeMeta.register.get(parse_type, None)
 
         if cls is None:
             raise ParseClassDoesNotExist('%s does not exist', parse_type)
 
+        # instantiate the object
         item = type(parse_type, (cls,), {})(**data)
+
+        # add parent to the object so that when this object is updated, the parent is marked as
+        # dirty
         item.add_parent(parent=self, attribute=key)
+
         return item
 
     def to_pointer(self):
@@ -225,3 +271,7 @@ class ParseObject(ParseType):
         return type('Pointer', (cls,), {})(className=self.className,
                                            objectId=self.objectId)
 
+
+# register types
+import pyparsecom.types
+import pyparsecom.user

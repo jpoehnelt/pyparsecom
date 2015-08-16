@@ -14,7 +14,7 @@ Python Parse.com Wrapper
 
 Python wrapper for the Parse.com rest api.
 
-* Free software: BSD license
+* Free software: MIT license
 * Documentation: https://pyparsecom.readthedocs.org.
 
 Features
