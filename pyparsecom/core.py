@@ -49,7 +49,7 @@ class Parse:
             cls.Initialization = Parse(*args, **kwargs)
         else:
             cls.Initialization.application_id = args[0]
-            cls.Initialization.rest_api_id = args[1]
+            cls.Initialization.rest_api_key = args[1]
             for k, v in kwargs.items():
                 setattr(cls, k, v)
 
