@@ -129,5 +129,11 @@ class QueryTest(unittest.TestCase):
         for city in cities:
             self.assertFalse(hasattr(city, 'country'))
 
+    def test_query_set_slicing(self):
+        self.create_cities()
+        query = Query('City')
+        query = query.does_not_exist('country')
+        cities = query.fetch()[2:4]
+        self.assertEqual(2, len(cities))
 
 

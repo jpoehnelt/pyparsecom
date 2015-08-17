@@ -225,6 +225,9 @@ class QuerySet(object):
     def __len__(self):
         return len(self.results)
 
+    def __getitem__(self, i):
+        return self.results[i]
+
     def __iter__(self):
         for row in self.results:
             cls = ComplexTypeMeta.register.get(self.className, None)
