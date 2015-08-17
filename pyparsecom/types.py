@@ -32,12 +32,15 @@ class GeoPoint(ParseType):
     def __eq__(self, other):
         return self.latitude == other.latitude and self.longitude == other.longitude
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         return {
             '__type': 'GeoPoint',
             'latitude': self.latitude,
             'longitude': self.longitude
         }
+
+    def __dict__(self):
+        return self.convert_from_native_to_parse()
 
 
 class Pointer(ParseType):
@@ -49,6 +52,9 @@ class Pointer(ParseType):
             'className': self.className,
             'objectId': self.objectId
         }
+
+    def __dict__(self):
+        return self.convert_from_native_to_parse()
 
     def load(self):
         cls = ComplexTypeMeta.register.get(self.className, None)
@@ -76,12 +82,15 @@ class Date(ParseType):
 
         super(Date, self).__init__()
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         # parse expects an iso8601 with 3 digits milliseonds and not 6
         return {
             '__type': 'Date',
             'iso': '{0}Z'.format(self._date.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3])
         }
+
+    def __dict__(self):
+        return self.convert_from_native_to_parse()
 
 
 class Binary(ParseType):
@@ -90,6 +99,8 @@ class Binary(ParseType):
         self._decoded = str(base64.b64decode(self._encoded))
         super(Binary, self).__init__()
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         return {'__type': 'Bytes', 'base64': self._encoded}
 
+    def __dict__(self):
+        return self.convert_from_native_to_parse()
