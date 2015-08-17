@@ -27,6 +27,13 @@ from .objects import ParseObject, ComplexTypeMeta
 from .exceptions import ParseClassDoesNotExist
 
 
+class ParseObjectEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ParseObject):
+           o = o.to_pointer().__dict__
+        return json.JSONEncoder.default(self, o)
+
+
 class Query(object):
 
     def __init__(self, className):
@@ -38,7 +45,7 @@ class Query(object):
 
     def build(self):
         params = deepcopy(self.params)
-        params['where'] = json.dumps(params['where'])
+        params['where'] = json.dumps(params['where'], cls=ParseObjectEncoder)
 
         if len(params['order']) == 0:
             del params['order']
@@ -129,6 +136,10 @@ class Query(object):
         q = deepcopy(self)
         if attribute in q.params['where']:
             raise Exception
+
+        if isinstance(value, ParseObject):
+            value = ParseObject.to_pointer()
+
         q.params['where'][attribute] = value
         return q
 
@@ -136,6 +147,10 @@ class Query(object):
         q = deepcopy(self)
         if attribute not in q.params['where']:
             q.params['where'][attribute] = {}
+
+        if isinstance(value, ParseObject):
+            value = ParseObject.to_pointer()
+
         q.params['where'][attribute]['$ne'] = value
         return q
 
@@ -212,7 +227,7 @@ class QuerySet(object):
             cls = ComplexTypeMeta.register.get(self.className, None)
 
             if cls is None:
-                raise  ParseClassDoesNotExist(
+                raise ParseClassDoesNotExist(
                     '%s does not exist' % self.className)
 
             item = type(self.className, (cls,), {})()
