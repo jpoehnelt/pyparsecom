@@ -48,7 +48,11 @@ class Query(object):
 
     def build(self):
         params = deepcopy(self.params)
-        params['where'] = json.dumps(params['where'], cls=ParseObjectEncoder)
+
+        if len(params['where']) == 0:
+            del params['where']
+        else:
+            params['where'] = json.dumps(params['where'], cls=ParseObjectEncoder)
 
         if len(params['order']) == 0:
             del params['order']
