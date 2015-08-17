@@ -49,7 +49,7 @@ class UserTest(unittest.TestCase):
         username = str(uuid.uuid4())
         user = User.signup(username, 'password')
         pointer = user.to_pointer()
-        pointer_data = pointer._convert_from_native_to_parse()
+        pointer_data = pointer.convert_from_native_to_parse()
         self.assertEqual(pointer_data['className'], '_User')
         self.assertEqual(pointer_data['__type'], 'Pointer')
         self.assertEqual(pointer_data['objectId'], user.objectId)

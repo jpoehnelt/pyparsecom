@@ -32,7 +32,7 @@ class ParseObjectEncoder(json.JSONEncoder):
         if isinstance(o, ParseObject):
             return o.to_pointer().__dict__
         elif isinstance(o, ParseType):
-            return o.__dict__
+            return o.to_json()
         else:
             return json.JSONEncoder.default(self, o)
 
@@ -70,7 +70,7 @@ class Query(object):
             'method': 'GET',
             'params': self.build()
         }
-        print(options)
+
         response = Parse.Initialization.request(**options)
 
         # not calling it loaded if keys were specified

@@ -51,6 +51,9 @@ class ParseType(object):
         super(ParseType, self).__delattr__(key)
         self._mark_parent_dirty()
 
+    def to_json(self):
+        return self.convert_from_native_to_parse()
+
     def convert_from_native_to_parse(self):
         pass
 
@@ -156,7 +159,7 @@ class ParseObject(ParseType):
             'route': 'classes',
             'className': self.__class__.__name__,
             'method': 'POST',
-            'data': dict((k, v) for k, v in self._convert_from_native_to_parse().items() if
+            'data': dict((k, v) for k, v in self.convert_from_native_to_parse().items() if
                          k in self._dirty_keys)
         }
 
@@ -194,7 +197,7 @@ class ParseObject(ParseType):
             item = type(className, (cls,), {})()
 
         for k, v in response.items():
-            setattr(item, k, item._convert_attribute_from_parse_to_native(k, v))
+            setattr(item, k, item.convert_attribute_from_parse_to_native(k, v))
 
             if k in item._dirty_keys:
                 item._dirty_keys.remove(k)
@@ -216,7 +219,7 @@ class ParseObject(ParseType):
 
         return data
 
-    def _convert_attribute_from_parse_to_native(self, key, data):
+    def convert_attribute_from_parse_to_native(self, key, data):
         """
         Converts attributes to python class by examining the data of the attribute.
         :param key: attribute name

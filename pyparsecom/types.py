@@ -39,9 +39,6 @@ class GeoPoint(ParseType):
             'longitude': self.longitude
         }
 
-    def __dict__(self):
-        return self.convert_from_native_to_parse()
-
 
 class Pointer(ParseType):
     __name__ = 'Pointer'
@@ -52,9 +49,6 @@ class Pointer(ParseType):
             'className': self.className,
             'objectId': self.objectId
         }
-
-    def __dict__(self):
-        return self.convert_from_native_to_parse()
 
     def load(self):
         cls = ComplexTypeMeta.register.get(self.className, None)
@@ -89,10 +83,6 @@ class Date(ParseType):
             'iso': '{0}Z'.format(self._date.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3])
         }
 
-    def __dict__(self):
-        return self.convert_from_native_to_parse()
-
-
 class Binary(ParseType):
     def __init__(self, encoded_string):
         self._encoded = encoded_string
@@ -101,6 +91,3 @@ class Binary(ParseType):
 
     def convert_from_native_to_parse(self):
         return {'__type': 'Bytes', 'base64': self._encoded}
-
-    def __dict__(self):
-        return self.convert_from_native_to_parse()
