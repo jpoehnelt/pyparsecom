@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 import unittest
 from pyparsecom.user import User
-from pyparsecom.core import Parse
 from pyparsecom.exceptions import ParseError
 import uuid
+from tests import init_parse
 
 
 class UserTest(unittest.TestCase):
     def setUp(self):
-        Parse.initialize('w32obnqOXh5n61OTuXIAbRZRj73oyEWCDuMBOQQu',
-                         'ZjCmqLRivFF16Ei8PV044XU0VgoqNL34wuvI4NQ7')
+        init_parse()
 
     def tearDown(self):
         pass

@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import unittest
-from pyparsecom.core import Parse
 from pyparsecom.objects import ParseObject, ComplexTypeMeta
 from pyparsecom.types import GeoPoint
 from pyparsecom.exceptions import ParseError
-
+from tests import init_parse
 
 class ParseObjectTest(unittest.TestCase):
     def setUp(self):
-        Parse.initialize('w32obnqOXh5n61OTuXIAbRZRj73oyEWCDuMBOQQu',
-                         'ZjCmqLRivFF16Ei8PV044XU0VgoqNL34wuvI4NQ7')
+        init_parse()
 
     def tearDown(self):
         pass
