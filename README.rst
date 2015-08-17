@@ -2,6 +2,10 @@
 Python Parse.com Wrapper
 ===============================
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/justinwp/pyparsecom
+   :target: https://gitter.im/justinwp/pyparsecom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://img.shields.io/travis/justinwp/pyparsecom.svg
         :target: https://travis-ci.org/justinwp/pyparsecom
 
