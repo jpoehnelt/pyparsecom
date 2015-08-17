@@ -141,7 +141,7 @@ class Query(object):
             raise Exception
 
         if isinstance(value, ParseObject):
-            value = ParseObject.to_pointer()
+            value = value.to_pointer()
 
         q.params['where'][attribute] = value
         return q
@@ -152,7 +152,7 @@ class Query(object):
             q.params['where'][attribute] = {}
 
         if isinstance(value, ParseObject):
-            value = ParseObject.to_pointer()
+            value = value.to_pointer()
 
         q.params['where'][attribute]['$ne'] = value
         return q
