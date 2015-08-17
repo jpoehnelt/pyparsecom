@@ -43,7 +43,7 @@ class GeoPoint(ParseType):
 class Pointer(ParseType):
     __name__ = 'Pointer'
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         return {
             '__type': 'Pointer',
             'className': self.className,

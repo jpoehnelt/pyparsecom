@@ -51,7 +51,7 @@ class ParseType(object):
         super(ParseType, self).__delattr__(key)
         self._mark_parent_dirty()
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         pass
 
     def add_parent(self, parent, attribute):
@@ -203,14 +203,14 @@ class ParseObject(ParseType):
 
         return item
 
-    def _convert_from_native_to_parse(self):
+    def convert_from_native_to_parse(self):
         data = {}
 
         for k, v in self.__dict__.items():
             if isinstance(v, ParseObject):
-                data[k] = v.to_pointer()._convert_from_native_to_parse()
+                data[k] = v.to_pointer().convert_from_native_to_parse()
             elif isinstance(v, ParseType):
-                data[k] = v._convert_from_native_to_parse()
+                data[k] = v.convert_from_native_to_parse()
             else:
                 data[k] = v
 

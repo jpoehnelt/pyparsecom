@@ -23,15 +23,18 @@ from six.moves.urllib.parse import urlencode
 import json
 from copy import deepcopy
 from .core import Parse
-from .objects import ParseObject, ComplexTypeMeta
+from .objects import ParseObject, ParseType, ComplexTypeMeta
 from .exceptions import ParseClassDoesNotExist
 
 
 class ParseObjectEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, ParseObject):
-           o = o.to_pointer().__dict__
-        return json.JSONEncoder.default(self, o)
+            return o.to_pointer().__dict__
+        elif isinstance(o, ParseType):
+            return o.__dict__
+        else:
+            return json.JSONEncoder.default(self, o)
 
 
 class Query(object):

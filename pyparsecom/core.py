@@ -142,7 +142,7 @@ class MasterKey:
         self.master_key = master_key
 
     def __enter__(self):
-        Parse.Initialization.master = self.master_key
+        Parse.Initialization.master_key = self.master_key
 
     def __exit__(self, *args, **kwargs):
         del Parse.Initialization.master_key
